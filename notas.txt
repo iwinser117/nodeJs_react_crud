@@ -1,0 +1,24 @@
+Entonces esto se va a dividir en dos carpetas el front y el backend
+
+
+BACKEND
+config que maneja la conexion a DB
+controller para las rutas
+middlewares para validar y autenticar
+models para las consultas a la DB
+routes para las rutas
+app config para el servidor
+server para levantar el servidor
+
+Que necesito para el backend
+
+express, dotenv, bcryptjs , jsonwebtoken, 
+
+pg --- //tomado de https://github.com/brianc/node-postgres/tree/master/packages/pg-pool
+
+1. configurar el servidor y la base de datos
+
+
+
+FRONTEND
+pendiente por implememntar

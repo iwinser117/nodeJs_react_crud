@@ -1,0 +1,35 @@
+{
+  "name": "backend_crud",
+  "version": "1.0.0",
+  "description": "Se implementa el crud, maneja autenticación, y la base de datos.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iwinser117/nodeJs_react_crud.git"
+  },
+  "keywords": [
+    "prueba",
+    "técnica",
+    "node/react"
+  ],
+  "author": "iwinser sanchez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iwinser117/nodeJs_react_crud/issues"
+  },
+  "homepage": "https://github.com/iwinser117/nodeJs_react_crud#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
