@@ -16,9 +16,18 @@ express, dotenv, bcryptjs , jsonwebtoken,
 
 pg --- //tomado de https://github.com/brianc/node-postgres/tree/master/packages/pg-pool
 
+
+
+
 1. configurar el servidor y la base de datos
 
 
 
 FRONTEND
 pendiente por implememntar
+
+
+para ejecutar desde backend
+1. docker-compose up
+
+en el 3001 esta el front y en el 3000 esta el backend
