@@ -31,3 +31,7 @@ para ejecutar desde backend
 1. docker-compose up
 
 en el 3001 esta el front y en el 3000 esta el backend
+
+
+docker-compose down
+docker-compose up --build
