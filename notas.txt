@@ -170,3 +170,15 @@ volumes:
 ================================================================
 
 
+Para ejecucion en entorno linux ,, reemplaza la siguiente configuracion en el docker-compose.yml
+
+*******************************************
+*     depends_on:                         *
+*           postgres:                     *
+*             condition: service_healthy  *
+*                                         *
+*     por:                                *
+*                                         *
+*     depends_on: *                       *
+*          - postgres *                   *
+*******************************************

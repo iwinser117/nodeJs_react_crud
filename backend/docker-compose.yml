@@ -32,11 +32,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # para linux 
+    ##depends_on:
+    ## - postgres
     volumes:
       - .:/app/backend
-      # Asegúrate de no sobrescribir node_modules
       - /app/backend/node_modules
-    command: npm start # Actualiza el comando de inicio si es necesario
 
   frontend:
     build:
