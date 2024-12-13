@@ -34,7 +34,9 @@ services:
         condition: service_healthy
     volumes:
       - .:/app/backend
+      # Asegúrate de no sobrescribir node_modules
       - /app/backend/node_modules
+    command: npm start # Actualiza el comando de inicio si es necesario
 
   frontend:
     build:
