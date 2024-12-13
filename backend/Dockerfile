@@ -7,10 +7,6 @@ RUN apk add --no-cache bash postgresql-client
 # Establecer directorio de trabajo 
 WORKDIR /app/backend 
 
-# Copiar script de espera
-COPY wait-for-postgres.sh /wait-for-postgres.sh
-RUN chmod +x /wait-for-postgres.sh
-
 # Copiar package.json y package-lock.json 
 COPY package*.json ./ 
 
@@ -24,4 +20,4 @@ COPY . .
 EXPOSE 3000 
 
 # Comando para esperar la base de datos y luego iniciar la app
-CMD ["/wait-for-postgres.sh", "node", "src/server.js"]
+CMD ["node", "src/server.js"]

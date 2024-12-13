@@ -32,9 +32,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # para linux 
-    ##depends_on:
-    ## - postgres
     volumes:
       - .:/app/backend
       - /app/backend/node_modules
