@@ -2,38 +2,56 @@ import React, { useMemo } from 'react';
 import {
     Modal, ModalContent, ModalHeader, ModalBody,
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-    Button, Pagination
+    Button, Pagination, Chip
 } from "@nextui-org/react";
 
 export const EmployeeRequestsModal = ({
     isOpen,
     onOpenChange,
     employeeId,
-    employeesData,
-    requestsData,
+    users, // Cambiado de employeesData
     currentRequestPage,
     onRequestPageChange,
     selectedRequests,
     onRequestSelect,
     onDeleteSelectedRequests
 }) => {
+    // Encontrar el usuario específico
+    const selectedUser = users.find(user => user.id === employeeId);
+
+    // Filtrar solicitudes del empleado específico
     const filteredEmployeeRequests = useMemo(() => {
-        if (!employeeId) return [];
-        const employeeRequests = requestsData.filter(req => req.employeeId === employeeId);
-        console.log("Filtradas:", employeeRequests);
+        if (!selectedUser) return [];
+        
         const requestsPerPage = 5;
         const startIndex = (currentRequestPage - 1) * requestsPerPage;
         const endIndex = startIndex + requestsPerPage;
-        return employeeRequests.slice(startIndex, endIndex);
-    }, [employeeId, currentRequestPage, requestsData]);
+        
+        return (selectedUser.requests || []).slice(startIndex, endIndex);
+    }, [employeeId, currentRequestPage, users]);
 
+    // Calcular total de páginas
     const employeeRequestPages = useMemo(() => {
-        if (!employeeId) return 0;
-        const employeeRequests = requestsData.filter(req => req.employeeId === employeeId);
-        return Math.ceil(employeeRequests.length / 5);
-    }, [employeeId, requestsData]);
+        if (!selectedUser) return 0;
+        return Math.ceil((selectedUser.requests || []).length / 5);
+    }, [employeeId, users]);
 
-    const employeeName = employeesData.find(e => e.id === employeeId)?.name;
+    // Mapeo de colores para estados de solicitud
+    const statusColorMap = {
+        'pending': 'warning',
+        'approved': 'success', 
+        'rejected': 'danger',
+        'in_progress': 'primary'
+    };
+
+    // Logging para depuración
+    console.log('Modal Props:', { 
+        isOpen, 
+        employeeId, 
+        users, 
+        selectedUser, 
+        filteredEmployeeRequests 
+    });
 
     return (
         <Modal
@@ -42,8 +60,11 @@ export const EmployeeRequestsModal = ({
             size="5xl"
         >
             <ModalContent>
-                <ModalHeader>
-                    Solicitudes de {employeeName || "Empleado desconocido"}
+                <ModalHeader className="flex flex-col">
+                    Solicitudes de {selectedUser?.name || "Empleado desconocido"}
+                    <p className="text-small text-default-500">
+                        Total de solicitudes: {(selectedUser?.requests || []).length}
+                    </p>
                 </ModalHeader>
                 <ModalBody>
                     <Table
@@ -73,17 +94,27 @@ export const EmployeeRequestsModal = ({
                     >
                         <TableHeader>
                             <TableColumn>ID</TableColumn>
-                            <TableColumn>Tipo</TableColumn>
+                            <TableColumn>Título</TableColumn>
                             <TableColumn>Estado</TableColumn>
                             <TableColumn>Fecha</TableColumn>
                         </TableHeader>
-                        <TableBody>
+                        <TableBody 
+                            emptyContent="No hay solicitudes para este empleado"
+                        >
                             {filteredEmployeeRequests.map((request) => (
                                 <TableRow key={request.id}>
                                     <TableCell>{request.id}</TableCell>
-                                    <TableCell>{request.type}</TableCell>
-                                    <TableCell>{request.status}</TableCell>
-                                    <TableCell>{request.date}</TableCell>
+                                    <TableCell>{request.title}</TableCell>
+                                    <TableCell>
+                                        <Chip 
+                                            color={statusColorMap[request.status] || 'default'}
+                                            size="sm"
+                                            variant="flat"
+                                        >
+                                            {request.status}
+                                        </Chip>
+                                    </TableCell>
+                                    <TableCell>{request.createdAt}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

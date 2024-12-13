@@ -41,13 +41,14 @@ const getRequests = async (req, res) => {
 
 const createRequest = async (req, res) => {
   const { title, description, status = 'pending' } = req.body;  // Default status
-
+  
   if (!title) {
     return res.status(400).json({ error: 'El título es obligatorio' });
   }
   if (!description) {
     return res.status(400).json({ error: 'La descripción es obligatoria' });
   }
+  
 
   const validStatuses = ['pending', 'in_progress', 'resolved', 'rejected', 'closed'];
   if (status && !validStatuses.includes(status)) {

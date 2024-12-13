@@ -22,15 +22,8 @@
         allowNull: false,
     },
     salary: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         allowNull: true, 
-        validate: {
-        isSalaryRequired(value) {
-            if (this.RoleId && this.RoleId === 1 && (value === null || value === undefined)) {
-            throw new Error('El salario es obligatorio para empleados.');
-            }
-        },
-        },
     },
     entry_date: {
         type: DataTypes.DATE,

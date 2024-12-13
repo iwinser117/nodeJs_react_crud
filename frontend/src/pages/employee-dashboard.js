@@ -3,7 +3,7 @@ import EmployeeDetailsCard from '../app/components/employee/employeeDetailsCard'
 import EmployeeFilters from '../app/components/employee/employeeFilters';
 import EmployeeRequestsTable from '../app/components/employee/employeeRequestsTable';
 import CreateRequestModal from '../app/components/employee/createRequestModal';
-import { useRouter } from 'next/router'; 
+import { useRouter } from 'next/router';
 
 import "../app/globals.css";
 
@@ -46,17 +46,15 @@ const Employee = () => {
             setToken(authToken);
             setUserRole(role);
             setUserData(user);
-            if(!authToken){
+            if (!authToken) {
                 router.push('/');
             }
         }
     }, []);
 
     useEffect(() => {
-        console.log(userRole)
         if (userRole && userRole !== 'employee') {
-            console.log(userRole)
-            router.push('/'); // Redirige a página de acceso denegado o la que prefieras
+            router.push('/'); // Redirige si el rol no es empleado
         }
     }, [userRole]);
 
@@ -82,7 +80,7 @@ const Employee = () => {
 
     const fetchRequestsData = async () => {
         try {
-            // Construct query parameters for filtering and pagination
+            // Construir parámetros de consulta para la paginación y los filtros
             const queryParams = new URLSearchParams({
                 page: currentPage,
                 limit: itemsPerPage,
@@ -124,7 +122,9 @@ const Employee = () => {
     }, [token, currentPage, filters]);
 
     const handlePageChange = (page) => {
-        setCurrentPage(page);
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
     };
 
     const handleFilterChange = (field, value) => {
@@ -142,7 +142,7 @@ const Employee = () => {
             description: newRequest.description,
             status: newRequest.status,
             userId: userData.id,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toISOString().split('T')[0]
         };
 
         try {
@@ -167,6 +167,12 @@ const Employee = () => {
         }
     };
 
+    const filteredRequests = requestsData.filter((request) => (
+        (!filters.status || request.status === filters.status) &&
+        (!filters.dateFrom || request.date >= filters.dateFrom) &&
+        (!filters.dateTo || request.date <= filters.dateTo)
+    ));
+
     return (
         <div className="employee-dashboard p-4">
             <EmployeeDetailsCard
@@ -178,7 +184,7 @@ const Employee = () => {
                 onFilterChange={handleFilterChange} 
             />
             <EmployeeRequestsTable
-                requests={requestsData}
+                requests={filteredRequests}  // Pasar solicitudes filtradas
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
@@ -190,7 +196,6 @@ const Employee = () => {
                 onRequestChange={handleRequestChange}
                 onCreateRequest={handleCreateRequest}
             />
-           
         </div>
     );
 };

@@ -30,7 +30,7 @@ const EmployeeFilters = ({ filters, onFilterChange }) => (
                 ))}
             </Select> */}
 
-            <Input
+            {/* <Input
                 type="date"
                 label="Fecha Desde"
                 value={filters.dateFrom}
@@ -42,7 +42,7 @@ const EmployeeFilters = ({ filters, onFilterChange }) => (
                 label="Fecha Hasta"
                 value={filters.dateTo}
                 onChange={(e) => onFilterChange("dateTo", e.target.value)}
-            />
+            /> */}
         </CardBody>
     </Card>
 );

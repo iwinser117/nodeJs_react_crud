@@ -93,13 +93,17 @@ const createUser = async (req, res) => {
       return res.status(400).json({ error: 'El salario es obligatorio para empleados' });
     }
 
+    if(salary && isNaN(salary)) {
+      salary = parseInt(salary, 10)
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
-      salary: userRole.name === 'employee' ? salary : null,
+      salary: userRole.name === 'employee' ? parseInt(salary) : null,
       entry_date: entry_date || new Date(),
       RoleId: userRole.id,
     });

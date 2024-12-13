@@ -5,6 +5,9 @@ const {
   deleteRequest 
 } = require('../controllers/requestController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const adminMiddleware = require('../middlewares/adminMiddleware');
+const { assignRequest } = require('../controllers/adminController');
+
 
 const router = express.Router();
 
@@ -14,5 +17,7 @@ router.post('/', authMiddleware, createRequest);
 
 // esto solo para admins
 router.delete('/:id', authMiddleware, deleteRequest);
+//esto es para crear desde admon
+router.post('/insert', authMiddleware, adminMiddleware, assignRequest);
 
 module.exports = router;

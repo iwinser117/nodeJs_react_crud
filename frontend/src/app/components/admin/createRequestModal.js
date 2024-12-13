@@ -22,8 +22,8 @@ export const CreateRequestModal = ({
                 <ModalBody>
                     <Select
                         label="Empleado"
-                        value={newRequest.employeeId}
-                        onChange={(e) => onRequestChange('employeeId', e.target.value)}
+                        value={newRequest.userId}
+                        onChange={(e) => onRequestChange('userId', e.target.value)}
                     >
                         {employeesData.map((employee) => (
                             <SelectItem key={employee.id} value={employee.id}>
@@ -31,22 +31,27 @@ export const CreateRequestModal = ({
                             </SelectItem>
                         ))}
                     </Select>
-                    <Select
-                        label="Tipo de Solicitud"
-                        value={newRequest.type}
-                        onChange={(e) => onRequestChange('type', e.target.value)}
-                    >
-                        {['Vacaciones', 'Permiso', 'Otro'].map((type) => (
-                            <SelectItem key={type} value={type}>
-                                {type}
-                            </SelectItem>
-                        ))}
-                    </Select>
+                    <Input
+                        label="titulo"
+                        value={newRequest.title}
+                        onChange={(e) => onRequestChange('title', e.target.value)}
+                    />
                     <Input
                         label="Descripción"
                         value={newRequest.description}
                         onChange={(e) => onRequestChange('description', e.target.value)}
                     />
+                    <Select
+                        label="Estado inicial solicitud"
+                        value={newRequest.type}
+                        onChange={(e) => onRequestChange('type', e.target.value)}
+                    >
+                        {['pending', 'in_progress', 'resolved', 'rejected', 'closed'].map((type) => (
+                            <SelectItem key={type} value={type}>
+                                {type}
+                            </SelectItem>
+                        ))}
+                    </Select>
                 </ModalBody>
                 <ModalFooter>
                     <Button color="danger" variant="light" onClick={() => onOpenChange(false)}>
@@ -55,7 +60,7 @@ export const CreateRequestModal = ({
                     <Button 
                         color="primary" 
                         onClick={onCreateRequest}
-                        isDisabled={!newRequest.employeeId || !newRequest.type}
+                        isDisabled={!newRequest.userId || !newRequest.type}
                     >
                         Crear Solicitud
                     </Button>

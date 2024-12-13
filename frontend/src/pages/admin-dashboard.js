@@ -7,7 +7,7 @@ import { EmployeeTable } from '../app/components/admin/employeeTable';
 import { EmployeeRequestsModal } from '../app/components/admin/employeeRequestsModal';
 import { CreateEmployeeModal } from '../app/components/admin/createEmployeeModal';
 import { CreateRequestModal } from '../app/components/admin/createRequestModal';
-import { useAuth } from '../contexts/authContext'; 
+import { useAuth } from '../contexts/authContext';
 
 import "../app/globals.css";
 
@@ -20,12 +20,12 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         if (isTokenExpired()) {
-          alert("Sesión terminada. Por favor, inicia sesión de nuevo.");
-          if(router.pathname === '/admin-dashboard'){
-              logout();
-          }
+            alert("Sesión terminada. Por favor, inicia sesión de nuevo.");
+            if (router.pathname === '/admin-dashboard') {
+                logout();
+            }
         }
-      }, []);
+    }, []);
     const [adminDetails, setAdminDetails] = useState({
         id: '',
         name: '',
@@ -65,7 +65,8 @@ const AdminDashboard = () => {
     const [newRequest, setNewRequest] = useState({
         employeeId: '',
         type: '',
-        description: ''
+        description: '',
+        title: '',
     });
 
     useEffect(() => {
@@ -87,7 +88,7 @@ const AdminDashboard = () => {
         console.log(userRole)
         if (userRole && userRole !== 'administrator') {
             console.log(userRole)
-            router.push('/'); 
+            router.push('/');
         }
     }, [userRole]);
     // Fetch admin details
@@ -228,6 +229,7 @@ const AdminDashboard = () => {
 
     const handleCreateEmployee = async () => {
         try {
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
                 method: 'POST',
                 headers: {
@@ -256,23 +258,33 @@ const AdminDashboard = () => {
 
     const handleCreateRequest = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/requests`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/requests/insert`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify(newRequest)
+                body: JSON.stringify(newRequest),
             });
 
             if (response.ok) {
-                fetchRequestsData();
+                // Limpiar temporalmente los datos de solicitudes
+                setRequestsData([]);
+
+                // Cerrar el modal y resetear los datos del formulario
                 setIsRequestModalOpen(false);
                 setNewRequest({
-                    employeeId: '',
+                    userId: '',
                     type: '',
-                    description: ''
+                    description: '',
+                    title: '',
                 });
+                fetchEmployeesData();
+
+                // Recargar los datos después de un pequeño retraso
+                setTimeout(() => {
+                    fetchRequestsData();
+                }, 500); // Ajusta el tiempo según sea necesario
             } else {
                 console.error('Error creating request:', response.status);
             }
@@ -280,6 +292,7 @@ const AdminDashboard = () => {
             console.error('Error creating request:', error);
         }
     };
+
 
     const handleDeleteRequests = async () => {
         try {
@@ -298,8 +311,21 @@ const AdminDashboard = () => {
             const allSuccessful = responses.every(response => response.ok);
 
             if (allSuccessful) {
-                fetchRequestsData();
+                // Actualizar datos después de eliminar
+                setRequestsData([]);
+                setEmployeesData([]);
                 setSelectedRequests([]);
+
+                fetchRequestsData();
+                fetchEmployeesData();
+
+                // Si estás en el modal de solicitudes de empleado, podrías ajustar la página
+                if (selectedEmployeeId) {
+                    // Opcional: ajustar página si es necesario
+                    setCurrentRequestPage(prevPage =>
+                        prevPage > 1 ? prevPage - 1 : 1
+                    );
+                }
             } else {
                 console.error('Error deleting some requests');
             }
@@ -342,8 +368,7 @@ const AdminDashboard = () => {
                 isOpen={isRequestDetailsModalOpen}
                 onOpenChange={setIsRequestDetailsModalOpen}
                 employeeId={selectedEmployeeId}
-                employeesData={employeesData}
-                requestsData={requestsData}
+                users={employeesData} // Cambiado de employeesData
                 currentRequestPage={currentRequestPage}
                 onRequestPageChange={setCurrentRequestPage}
                 selectedRequests={selectedRequests}

@@ -42,6 +42,9 @@ export default function App() {
         if (data.role === "employee" && (!data.salary || isNaN(data.salary))) {
             newErrors.salary = "Salary is required and must be a number for employees";
         }
+        if (data.role === "employee") {
+            data.salary = Number(data.salary);
+        }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);

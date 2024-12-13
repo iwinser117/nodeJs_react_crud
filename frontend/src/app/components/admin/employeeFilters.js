@@ -33,7 +33,7 @@ export const EmployeeFilters = ({
                     value={filters.salaryMax}
                     onChange={(e) => onFilterChange('salaryMax', e.target.value)}
                 />
-                <Select
+                {/* <Select
                     label="Tipo de Solicitud"
                     value={filters.requestType}
                     onChange={(e) => onFilterChange('requestType', e.target.value)}
@@ -48,7 +48,7 @@ export const EmployeeFilters = ({
                     label="Código de Solicitud"
                     value={filters.requestCode}
                     onChange={(e) => onFilterChange('requestCode', e.target.value)}
-                />
+                /> */}
             </CardBody>
         </Card>
     );

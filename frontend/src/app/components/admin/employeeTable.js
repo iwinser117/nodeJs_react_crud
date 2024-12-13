@@ -8,9 +8,9 @@ import {
 export const EmployeeTable = ({
     employees,
     currentPage,
-    itemsPerPage,
     totalPages,
-    onPageChange
+    onPageChange,
+    onViewRequests
 }) => {
     return (
         <Card className="mb-4">
@@ -33,7 +33,7 @@ export const EmployeeTable = ({
                                 <TableCell>{employee.role}</TableCell>
                                 <TableCell>{employee.totalRequests}</TableCell>
                                 <TableCell>
-                                    <Button size="sm" color="primary">Consultar</Button>
+                                    <Button size="sm" color="primary" onPress={() => onViewRequests(employee.id)}>Consultar</Button>
                                 </TableCell>
                             </TableRow>
                         ))}
