@@ -1,39 +1,37 @@
-const db = require('../config/database');
+const { Request, User } = require('../models');
 
+// Obtener solicitudes con paginación y manejo de errores
 const getRequests = async (req, res) => {
   try {
-    // nos vamos de 10 en 10
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    // Consulta para obtener con paginación
-    const countQuery = 'SELECT COUNT(*) FROM requests';
-    const dataQuery = `
-      SELECT 
-        r.id, 
-        r.title, 
-        r.description, 
-        r.status, 
-        r.created_at,
-        u.name AS user_name,
-        u.email AS user_email
-      FROM requests r
-      JOIN users u ON r.user_id = u.id
-      ORDER BY r.created_at DESC
-      LIMIT $1 OFFSET $2
-    `;
-
-    const countResult = await db.query(countQuery);
-    const total = parseInt(countResult.rows[0].count);
-
-    const dataResult = await db.query(dataQuery, [limit, offset]);
+    const { count: total, rows: requests } = await Request.findAndCountAll({
+      include: [
+        {
+          model: User,
+          attributes: ['name', 'email'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset,
+    });
 
     res.json({
       total,
       page,
       limit,
-      data: dataResult.rows
+      data: requests.map((request) => ({
+        id: request.id,
+        title: request.title,
+        description: request.description,
+        status: request.status,  // Ahora se incluye el status
+        created_at: request.createdAt,
+        user_name: request.User.name,
+        user_email: request.User.email,
+      })),
     });
   } catch (error) {
     console.error(error);
@@ -42,21 +40,42 @@ const getRequests = async (req, res) => {
 };
 
 const createRequest = async (req, res) => {
-  const { title, description } = req.body;
-  
+  const { title, description, status = 'pending' } = req.body;  // Default status
+
   if (!title) {
     return res.status(400).json({ error: 'El título es obligatorio' });
   }
+  if (!description) {
+    return res.status(400).json({ error: 'La descripción es obligatoria' });
+  }
+
+  const validStatuses = ['pending', 'in_progress', 'resolved', 'rejected', 'closed'];
+  if (status && !validStatuses.includes(status)) {
+    return res.status(400).json({ error: 'El estado proporcionado no es válido. Los estados válidos son: pending, approved, rejected.' });
+  }
 
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; 
 
-    const result = await db.query(
-      'INSERT INTO requests (user_id, title, description) VALUES ($1, $2, $3) RETURNING *',
-      [userId, title, description]
-    );
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
 
-    res.status(201).json(result.rows[0]);
+    const newRequest = await Request.create({
+      userId,
+      title,
+      description,
+      status,  
+    });
+
+    res.status(201).json({
+      id: newRequest.id,
+      title: newRequest.title,
+      description: newRequest.description,
+      status: newRequest.status,
+      createdAt: newRequest.createdAt,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -64,25 +83,25 @@ const createRequest = async (req, res) => {
 };
 
 const deleteRequest = async (req, res) => {
+  // console.log(req.user.RoleId)
   const { id } = req.params;
 
   try {
-    if (req.user.role !== 'admin') {
+    if (req.user.RoleId !== 2) {
       return res.status(403).json({ error: 'No autorizado' });
     }
 
-    const result = await db.query(
-      'DELETE FROM requests WHERE id = $1 RETURNING *',
-      [id]
-    );
+    const requestToDelete = await Request.findByPk(id);
 
-    if (result.rows.length === 0) {
+    if (!requestToDelete) {
       return res.status(404).json({ error: 'Solicitud no encontrada' });
     }
 
-    res.json({ 
+    await requestToDelete.destroy();
+
+    res.json({
       message: 'Solicitud eliminada exitosamente',
-      deletedRequest: result.rows[0]
+      deletedRequest: requestToDelete,
     });
   } catch (error) {
     console.error(error);
@@ -93,5 +112,5 @@ const deleteRequest = async (req, res) => {
 module.exports = {
   getRequests,
   createRequest,
-  deleteRequest
+  deleteRequest,
 };

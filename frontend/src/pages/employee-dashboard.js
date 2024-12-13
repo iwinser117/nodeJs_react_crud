@@ -1,44 +1,127 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import EmployeeDetailsCard from '../app/components/employee/employeeDetailsCard';
 import EmployeeFilters from '../app/components/employee/employeeFilters';
 import EmployeeRequestsTable from '../app/components/employee/employeeRequestsTable';
 import CreateRequestModal from '../app/components/employee/createRequestModal';
+import { useRouter } from 'next/router'; 
+
 import "../app/globals.css";
 
 const Employee = () => {
-    const employeeDetails = {
+    const [employeeDetails, setEmployeeDetails] = useState({
         id: 'EMP001',
         name: 'Juan Pérez',
         hireDate: '2023-05-15',
         salary: 45000
+    });
+
+    const [requestsData, setRequestsData] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newRequest, setNewRequest] = useState({ 
+        title: '', 
+        description: '', 
+        status: 'pending' 
+    });
+    const [filters, setFilters] = useState({ 
+        status: '', 
+        type: '', 
+        dateFrom: '', 
+        dateTo: '' 
+    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [token, setToken] = useState(null);
+    const [userRole, setUserRole] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalRequests, setTotalRequests] = useState(0);
+    const itemsPerPage = 10;
+    const router = useRouter();
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const authToken = localStorage.getItem('authToken');
+            const role = localStorage.getItem('userRole');
+            const user = JSON.parse(localStorage.getItem('userData'));
+            
+            setToken(authToken);
+            setUserRole(role);
+            setUserData(user);
+            if(!authToken){
+                router.push('/');
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        console.log(userRole)
+        if (userRole && userRole !== 'employee') {
+            console.log(userRole)
+            router.push('/'); // Redirige a página de acceso denegado o la que prefieras
+        }
+    }, [userRole]);
+
+    // Fetch employee details
+    const fetchEmployeeData = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/user`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setEmployeeDetails(data.user);
+            } else {
+                console.error('Error fetching employee details:', response.status);
+            }
+        } catch (error) {
+            console.error('Error fetching employee details:', error);
+        }
     };
 
-    const [requestsData, setRequestsData] = useState([
-        { id: 'REQ001', code: 'VAC-2024', description: 'Solicitud de vacaciones', summary: 'Vacaciones de verano', status: 'Pendiente', type: 'Vacaciones', date: '2024-06-15' },
-        { id: 'REQ002', code: 'PER-2024', description: 'Permiso personal', summary: 'Trámite familiar', status: 'Aprobado', type: 'Permiso', date: '2024-05-20' },
-        //y mucho mas
-    ]);
+    const fetchRequestsData = async () => {
+        try {
+            // Construct query parameters for filtering and pagination
+            const queryParams = new URLSearchParams({
+                page: currentPage,
+                limit: itemsPerPage,
+                status: filters.status,
+                type: filters.type,
+                dateFrom: filters.dateFrom,
+                dateTo: filters.dateTo
+            });
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newRequest, setNewRequest] = useState({ type: '', description: '', summary: '' });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/requests?${queryParams}`, 
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            
+            if (response.ok) {
+                const { total, page, limit, data } = await response.json();
+                
+                setRequestsData(data);
+                setTotalRequests(total);
+                setTotalPages(Math.ceil(total / limit));
+                setCurrentPage(page);
+            } else {
+                console.error('Error fetching requests:', response.status);
+            }
+        } catch (error) {
+            console.error('Error fetching requests:', error);
+        }
+    };
 
-    const [filters, setFilters] = useState({ status: '', type: '', dateFrom: '', dateTo: '' });
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
-
-    const filteredRequests = requestsData.filter((request) => (
-        (!filters.status || request.status === filters.status) &&
-        (!filters.type || request.type === filters.type) &&
-        (!filters.dateFrom || request.date >= filters.dateFrom) &&
-        (!filters.dateTo || request.date <= filters.dateTo)
-    ));
-
-    const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
-
-    const paginatedRequests = filteredRequests.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    useEffect(() => {
+        if (token) {
+            fetchEmployeeData();
+            fetchRequestsData();
+        }
+    }, [token, currentPage, filters]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -46,25 +129,42 @@ const Employee = () => {
 
     const handleFilterChange = (field, value) => {
         setFilters((prev) => ({ ...prev, [field]: value }));
-        setCurrentPage(1); // Reinicia la página al aplicar filtros
+        setCurrentPage(1); // Reset to first page when filters change
     };
 
     const handleRequestChange = (field, value) => {
         setNewRequest((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleCreateRequest = () => {
+    const handleCreateRequest = async () => {
         const newRequestObj = {
-            id: `REQ${requestsData.length + 1}`,
-            code: `${newRequest.type.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
-            ...newRequest,
-            status: 'Pendiente',
-            date: new Date().toISOString().split('T')[0]
+            title: newRequest.title,
+            description: newRequest.description,
+            status: newRequest.status,
+            userId: userData.id,
+            createdAt: new Date().toISOString(),
         };
 
-        setRequestsData([...requestsData, newRequestObj]);
-        setIsModalOpen(false);
-        setNewRequest({ type: '', description: '', summary: '' });
+        try {
+            const response = await fetch('http://localhost:3000/api/requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(newRequestObj)
+            });
+
+            if (response.ok) {
+                fetchRequestsData();
+                setIsModalOpen(false);
+                setNewRequest({ title: '', description: '', status: 'pending' });
+            } else {
+                console.error('Error creating request:', response.status);
+            }
+        } catch (error) {
+            console.error('Error creating request:', error);
+        }
     };
 
     return (
@@ -73,9 +173,12 @@ const Employee = () => {
                 employeeDetails={employeeDetails}
                 onCreateRequest={() => setIsModalOpen(true)}
             />
-            <EmployeeFilters filters={filters} onFilterChange={handleFilterChange} />
+            <EmployeeFilters 
+                filters={filters} 
+                onFilterChange={handleFilterChange} 
+            />
             <EmployeeRequestsTable
-                requests={paginatedRequests}
+                requests={requestsData}
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
@@ -87,6 +190,7 @@ const Employee = () => {
                 onRequestChange={handleRequestChange}
                 onCreateRequest={handleCreateRequest}
             />
+           
         </div>
     );
 };

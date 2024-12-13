@@ -6,29 +6,32 @@ const CreateRequestModal = ({ isOpen, onOpenChange, newRequest, onRequestChange,
         <ModalContent>
             <ModalHeader>Crear Nueva Solicitud</ModalHeader>
             <ModalBody>
-                <Select
-                    label="Tipo de Solicitud"
-                    value={newRequest.type}
-                    onChange={(e) => onRequestChange("type", e.target.value)}
-                >
-                    {['Vacaciones', 'Permiso', 'Otro'].map((type) => (
-                        <SelectItem key={type} value={type}>
-                            {type}
-                        </SelectItem>
-                    ))}
-                </Select>
+                <Input
+                    label="Título"
+                    value={newRequest.title}
+                    onChange={(e) => onRequestChange("title", e.target.value)}
+                    required
+                />
 
                 <Input
                     label="Descripción"
                     value={newRequest.description}
                     onChange={(e) => onRequestChange("description", e.target.value)}
+                    required
                 />
 
-                <Input
-                    label="Resumen"
-                    value={newRequest.summary}
-                    onChange={(e) => onRequestChange("summary", e.target.value)}
-                />
+                <Select
+                    label="Estado"
+                    value={newRequest.status}
+                    onChange={(e) => onRequestChange("status", e.target.value)}
+                    required
+                >
+                    {['pending', 'in_progress', 'resolved', 'rejected', 'closed'].map((status) => (
+                        <SelectItem key={status} value={status} textValue={status}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)} {/* Capitalizamos la primera letra */}
+                        </SelectItem>
+                    ))}
+                </Select>
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" variant="light" onClick={() => onOpenChange(false)}>
@@ -37,7 +40,7 @@ const CreateRequestModal = ({ isOpen, onOpenChange, newRequest, onRequestChange,
                 <Button 
                     color="primary" 
                     onClick={onCreateRequest}
-                    isDisabled={!newRequest.type || !newRequest.description}
+                    isDisabled={!newRequest.title || !newRequest.description || !newRequest.status}
                 >
                     Crear Solicitud
                 </Button>

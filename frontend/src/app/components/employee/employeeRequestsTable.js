@@ -6,9 +6,10 @@ import {
 const EmployeeRequestsTable = ({ requests, currentPage, totalPages, onPageChange }) => {
     const renderStatusChip = (status) => {
         const colorMap = {
-            'Pendiente': 'warning',
-            'Aprobado': 'success',
-            'Rechazado': 'danger'
+            'pending': 'warning',
+            'resolved': 'success',
+            'rejected': 'danger',
+            'in_progress': 'primary',
         };
 
         return <Chip color={colorMap[status] || 'default'} size="sm">{status}</Chip>;
@@ -19,7 +20,7 @@ const EmployeeRequestsTable = ({ requests, currentPage, totalPages, onPageChange
             <Table aria-label="Tabla de solicitudes">
                 <TableHeader>
                     <TableColumn>ID</TableColumn>
-                    <TableColumn>Código</TableColumn>
+                    {/* <TableColumn>Código</TableColumn> */}
                     <TableColumn>Descripción</TableColumn>
                     <TableColumn>Resumen</TableColumn>
                     <TableColumn>Fecha</TableColumn>
@@ -29,10 +30,10 @@ const EmployeeRequestsTable = ({ requests, currentPage, totalPages, onPageChange
                     {requests.map((request) => (
                         <TableRow key={request.id}>
                             <TableCell>{request.id}</TableCell>
-                            <TableCell>{request.code}</TableCell>
+                            {/* <TableCell>{request.code}</TableCell> */}
+                            <TableCell>{request.title}</TableCell>
                             <TableCell>{request.description}</TableCell>
-                            <TableCell>{request.summary}</TableCell>
-                            <TableCell>{request.date}</TableCell>
+                            <TableCell>{new Date(request.created_at).toLocaleDateString('es-ES')}</TableCell>
                             <TableCell>{renderStatusChip(request.status)}</TableCell>
                         </TableRow>
                     ))}

@@ -10,14 +10,14 @@ const EmployeeFilters = ({ filters, onFilterChange }) => (
                 selectedKeys={filters.status ? [filters.status] : []}
                 onChange={(e) => onFilterChange("status", e.target.value)}
             >
-                {['Pendiente', 'Aprobado', 'Rechazado'].map((status) => (
+                {['pending', 'in_progress', 'resolved', 'rejected', 'closed'].map((status) => (
                     <SelectItem key={status} value={status}>
                         {status}
                     </SelectItem>
                 ))}
             </Select>
 
-            <Select
+            {/* <Select
                 label="Tipo"
                 className="max-w-xs"
                 selectedKeys={filters.type ? [filters.type] : []}
@@ -28,7 +28,7 @@ const EmployeeFilters = ({ filters, onFilterChange }) => (
                         {type}
                     </SelectItem>
                 ))}
-            </Select>
+            </Select> */}
 
             <Input
                 type="date"

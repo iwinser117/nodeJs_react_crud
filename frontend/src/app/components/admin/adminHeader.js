@@ -3,6 +3,7 @@ import {
     Card, CardBody, 
     User, Button
 } from "@nextui-org/react";
+import { useAuth } from '../../../contexts/authContext.js'
 
 export const AdminHeader = ({ 
     adminDetails, 
@@ -10,6 +11,7 @@ export const AdminHeader = ({
     onCreateRequest, 
     onDeleteRequests 
 }) => {
+const { logout } = useAuth();
     return (
         <Card className="mb-4">
             <CardBody className="flex flex-row items-center">
@@ -40,9 +42,9 @@ export const AdminHeader = ({
                     </Button>
                     <Button 
                         color="danger" 
-                        onPress={onDeleteRequests}
+                        onPress={logout}
                     >
-                        Eliminar Solicitudes
+                        Cerrar sesión
                     </Button>
                 </div>
             </CardBody>

@@ -10,9 +10,7 @@ const router = express.Router();
 
 // solo para empleados y admins
 router.get('/', authMiddleware, getRequests);
-
 router.post('/', authMiddleware, createRequest);
-
 
 // esto solo para admins
 router.delete('/:id', authMiddleware, deleteRequest);

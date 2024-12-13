@@ -1,20 +1,27 @@
-# Usar imagen base de Node.js
-FROM node:18-alpine
+# Usar imagen base de Node.js 
+FROM node:18-alpine 
 
-# Establecer directorio de trabajo
-WORKDIR /app/backend
+# Instalar herramientas de espera y PostgreSQL client
+RUN apk add --no-cache bash postgresql-client
 
-# Copiar package.json y package-lock.json
+# Establecer directorio de trabajo 
+WORKDIR /app/backend 
+
+# Copiar script de espera (lo crearás a continuación)
+COPY wait-for-postgres.sh /wait-for-postgres.sh
+RUN chmod +x /wait-for-postgres.sh
+
+# Copiar package.json y package-lock.json 
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm install
+# Instalar dependencias 
+RUN npm install 
 
-# Copiar el resto del código
+# Copiar el resto del código 
 COPY . .
 
-# Exponer el puerto que usa la aplicación
-EXPOSE 3000
+# Exponer el puerto que usa la aplicación 
+EXPOSE 3000 
 
-# Comando para iniciar la aplicación
-CMD ["npm", "start"]
+# Comando para iniciar la aplicación 
+CMD ["/wait-for-postgres.sh"]

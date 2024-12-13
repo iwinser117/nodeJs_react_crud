@@ -35,3 +35,12 @@ en el 3001 esta el front y en el 3000 esta el backend
 
 docker-compose down
 docker-compose up --build
+
+
+en el backen ejecutar migracion asi:
+
+npx sequelize-cli db:migrate
+
+
+creamos lo rwequerido:
+npx sequelize-cli migration:generate --name create-requests
